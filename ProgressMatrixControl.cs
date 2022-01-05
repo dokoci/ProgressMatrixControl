@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
+﻿using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
 
 namespace ProgressMatrixLibrary
 {
@@ -27,6 +21,7 @@ namespace ProgressMatrixLibrary
                 DoubleBuffered = true;
                 BorderStyle = BorderStyle.FixedSingle;
                 Margin = new Padding(1);
+                int i = 0;
 
 
             }
@@ -58,14 +53,23 @@ namespace ProgressMatrixLibrary
         }
       
 
-        CancellationTokenSource tokenSource;
+        CancellationTokenSource mTokenSource;
+        private Task mProgressTask;
 
         public ProgressMatrixControl()
         {
-            
+
             InitializeComponent();
-           
-            tokenSource = new CancellationTokenSource();
+            InitializeMatrix();
+            
+            mTokenSource = new CancellationTokenSource();
+
+            
+
+        }
+
+        private void InitializeMatrix()
+        {
             for (int y = 0; y < 3; ++y)
             {
                 for (int x = 0; x < 3; ++x)
@@ -75,53 +79,54 @@ namespace ProgressMatrixLibrary
 
                 }
             }
-           
         }
+
         bool mStop = false;
         public void Stop()
         {
             mStop = true;
-            tokenSource.Cancel();
+            mTokenSource.Cancel();
         }
        
         public void ProgressSimple()
-        {
+        { 
+            var token = mTokenSource.Token;
+            mStop = false;
+
           
-            var token = tokenSource.Token;
-
-            var t = Task.Run(() =>
+            
+            mProgressTask = Task.Run(() =>
             {
+                FadeCells(ref token);
 
-                if (tableLayoutPanel1 != null)
-                {
-
-                    while (false == mStop)
-                    {
-
-                        for (int y = 2; y >= 0; --y)
-                        {
-                            for (int x = 0; x < 3; ++x)
-                            {
-
-                                ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
-                                cellSquare.FadeIn(Color.FromArgb(123, 123, 234));
-                                //sq.FadeOut(Color.FromArgb(123, 123, 234));
-                                if (token.IsCancellationRequested) break;
-                            }
-                            Thread.Sleep(2);
-                        }
-                        if (token.IsCancellationRequested) break;
-                    }
-                    
-                        if (token.IsCancellationRequested)   return;
-                   
-                }
             }, token);
+
+            
         }
 
+        private void FadeCells(ref CancellationToken token)
+        {
+            while (false == mStop)
+            {
 
+                for (int y = 2; y >= 0; --y)
+                {
+                    for (int x = 0; x < 3; ++x)
+                    {
 
+                        ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
+                        cellSquare.FadeIn(Color.FromArgb(123, 123, 234));
+                        //sq.FadeOut(Color.FromArgb(123, 123, 234));
+                        if (token.IsCancellationRequested) break;
+                    }
+                    Thread.Sleep(2);
+                    if (token.IsCancellationRequested) break;
+                }
+               
+            }
 
+            if (token.IsCancellationRequested) return;
+        }
     }
    
 }
