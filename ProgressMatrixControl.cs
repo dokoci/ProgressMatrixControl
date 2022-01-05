@@ -21,7 +21,7 @@ namespace ProgressMatrixLibrary
                 DoubleBuffered = true;
                 BorderStyle = BorderStyle.FixedSingle;
                 Margin = new Padding(1);
-                int i = 0;
+           
 
 
             }
@@ -55,15 +55,12 @@ namespace ProgressMatrixLibrary
 
         CancellationTokenSource mTokenSource;
         private Task mProgressTask;
-
+        private Color mCellColor;
         public ProgressMatrixControl()
         {
 
             InitializeComponent();
             InitializeMatrix();
-            
-            mTokenSource = new CancellationTokenSource();
-
             
 
         }
@@ -86,20 +83,37 @@ namespace ProgressMatrixLibrary
         {
             mStop = true;
             mTokenSource.Cancel();
+            mProgressTask.Wait();
+            ResetCells(); 
+
         }
-       
-        public void ProgressSimple()
-        { 
-            var token = mTokenSource.Token;
-            mStop = false;
 
-          
-            
-            mProgressTask = Task.Run(() =>
+        private void ResetCells()
+        {
+            for (int y = 2; y >= 0; --y)
             {
-                FadeCells(ref token);
+                for (int x = 0; x < 3; ++x)
+                {
 
-            }, token);
+                    ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
+                    cellSquare.BackColor = Color.White;
+
+                }
+            }
+        }
+
+        public void ProgressRowsSimple()
+        {
+            mTokenSource = new CancellationTokenSource();
+            CancellationToken cancelToken = mTokenSource.Token;
+            mStop = false;
+            mCellColor = Color.FromArgb(0, 144, 223);
+
+             mProgressTask = Task.Run(() =>
+            {
+                FadeCells(ref cancelToken);
+
+            }, cancelToken);
 
             
         }
@@ -115,14 +129,15 @@ namespace ProgressMatrixLibrary
                     {
 
                         ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
-                        cellSquare.FadeIn(Color.FromArgb(123, 123, 234));
-                        //sq.FadeOut(Color.FromArgb(123, 123, 234));
+                        cellSquare.FadeIn(mCellColor);
                         if (token.IsCancellationRequested) break;
                     }
                     Thread.Sleep(2);
                     if (token.IsCancellationRequested) break;
                 }
-               
+                ResetCells();
+
+
             }
 
             if (token.IsCancellationRequested) return;
