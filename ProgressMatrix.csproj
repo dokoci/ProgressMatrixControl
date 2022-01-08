@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{16D1DFFF-C585-4321-B777-6B200A3E2260}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>WindowsFormsControlLibrary1</RootNamespace>
-    <AssemblyName>WindowsFormsControlLibrary1</AssemblyName>
+    <RootNamespace>ProgressMatrixLibrary</RootNamespace>
+    <AssemblyName>ProgressMatrix</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
