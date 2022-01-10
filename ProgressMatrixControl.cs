@@ -33,7 +33,6 @@ namespace ProgressMatrixLibrary
             }
             public void FadeIn(Color BaseColor)
             {
-                //SolidBrush shadowBrush = new SolidBrush(Color.Red);
 
                 for (int alpha = 0; alpha < 255; alpha += 2)
                 {
@@ -41,10 +40,6 @@ namespace ProgressMatrixLibrary
                     this.BackColor = Color.FromArgb(alpha, BaseColor);
                     Thread.Sleep(1);
 
-                    //shadowBrush.Color = Color.FromArgb(alpha, BaseColor);
-                    //Rectangle r = this.ClientRectangle;
-                    //Graphics g =  this.CreateGraphics();
-                    //g.FillRectangle(shadowBrush, r.X, r.Y, r.Width, r.Height);
 
                 }
                 State = 1;
@@ -59,7 +54,7 @@ namespace ProgressMatrixLibrary
                     this.BackColor = Color.FromArgb(alpha, BaseColor);
                     Thread.Sleep(1);
                 }
-                 BackColor = Color.WhiteSmoke;
+                BackColor = Color.WhiteSmoke;
                 State = 0;
             }
 
@@ -69,7 +64,11 @@ namespace ProgressMatrixLibrary
 
         public enum ProgressStyle
         {
-            Standard = 0, Animation = 1
+            Standard = 0, Classic = 1, ColumnBLocks = 2, Random = 3
+        };
+        public enum ProgressState
+        {
+            Idle = 0, Animate = 1, ColumnBLocks = 2, Random = 3
         };
         CancellationTokenSource mTokenSource;
         private Task mProgressTask;
@@ -81,8 +80,13 @@ namespace ProgressMatrixLibrary
             InitializeComponent();
             InitializeMatrix();
 
+            Style = ProgressStyle.Classic;
+            State = ProgressState.Idle;
+        }
 
-
+        private ProgressState State
+        {
+            set; get;
         }
 
         int mValue = 0;
@@ -126,6 +130,7 @@ namespace ProgressMatrixLibrary
             mTokenSource.Cancel();
             mProgressTask.Wait();
             ResetCells();
+            State = ProgressState.Idle;
 
         }
 
@@ -143,18 +148,33 @@ namespace ProgressMatrixLibrary
             }
         }
 
-        public void ProgressRowsSimple()
+        public void ProgressAnimation()
         {
+            if (State == ProgressState.Animate) return;
+
             mTokenSource = new CancellationTokenSource();
             CancellationToken cancelToken = mTokenSource.Token;
             mStop = false;
             mCellColor = Color.FromArgb(0, 144, 223);
 
+            State = ProgressState.Animate;
             mProgressTask = Task.Run(() =>
            {
-               //AnimateCellsRowWise(ref cancelToken);
-               //AnimateCellsColumnBlocks(ref cancelToken);
-               AnimateCellsRandom(ref cancelToken);
+               switch (Style)
+               {
+                   case ProgressStyle.Classic:
+                       AnimateCellsRowWise(ref cancelToken);
+                       break;
+                   case ProgressStyle.Random:
+                       AnimateCellsRandom(ref cancelToken);
+                       break;
+                   case ProgressStyle.ColumnBLocks:
+                       AnimateCellsColumnBlocks(ref cancelToken);
+                       break;
+                   default:
+                       break;
+               }
+
 
            }, cancelToken);
 
@@ -216,12 +236,13 @@ namespace ProgressMatrixLibrary
 
         private void AnimateCellsRandom(ref CancellationToken token)
         {
-            var r = new System.Random();
+            var randomNumber = new System.Random();
             while (false == mStop)
             {
                 if (token.IsCancellationRequested) break;
-                int x = r.Next(0,3);
-                int y = r.Next(0,3);
+
+                int x = randomNumber.Next(0, 3);
+                int y = randomNumber.Next(0, 3);
 
                 ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
                 if (cellSquare.State == 0)
