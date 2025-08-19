@@ -143,9 +143,17 @@ namespace ProgressMatrixLibrary
                 form.Controls.Add(this);
             }
             BringToFront();
+           
+            CenterProgress(form);
+
+            form.Resize += (s, e) => CenterProgress(form);
+            Show();
+        }
+
+        private void CenterProgress(Form form)
+        {
             Left = (form.ClientSize.Width - Width) / 2;
             Top = (form.ClientSize.Height - Height) / 2;
-            Show();
         }
         public void ProgressAnimation()
         {
