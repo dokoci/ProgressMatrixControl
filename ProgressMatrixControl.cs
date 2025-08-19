@@ -10,21 +10,18 @@ namespace ProgressMatrixLibrary
 
     public partial class ProgressMatrixControl : UserControl
     {
-
+        [ToolboxItem(true)]
         public class ProgressSquare : Panel
         {
 
             public ProgressSquare()
             {
-
                 BackColor = Color.WhiteSmoke;
                 Dock = DockStyle.Fill;
                 DoubleBuffered = true;
                 BorderStyle = BorderStyle.None;
                 Margin = new Padding(1);
                 State = 0;
-
-
             }
 
             public int State
@@ -36,11 +33,8 @@ namespace ProgressMatrixLibrary
 
                 for (int alpha = 0; alpha < 255; alpha += 2)
                 {
-
-                    this.BackColor = Color.FromArgb(alpha, BaseColor);
+                    BackColor = Color.FromArgb(alpha, BaseColor);
                     Thread.Sleep(1);
-
-
                 }
                 State = 1;
 
@@ -51,14 +45,12 @@ namespace ProgressMatrixLibrary
                 for (int alpha = 255; alpha > 0; alpha -= 2)
                 {
 
-                    this.BackColor = Color.FromArgb(alpha, BaseColor);
+                    BackColor = Color.FromArgb(alpha, BaseColor);
                     Thread.Sleep(1);
                 }
                 BackColor = Color.WhiteSmoke;
                 State = 0;
             }
-
-
 
         }
 
@@ -101,7 +93,6 @@ namespace ProgressMatrixLibrary
             {
                 mValue = value;
 
-
             }
         }
         [Description(""), Category("Behaviour")]
@@ -131,7 +122,6 @@ namespace ProgressMatrixLibrary
             mProgressTask.Wait();
             ResetCells();
             State = ProgressState.Idle;
-
         }
 
         private void ResetCells()
@@ -140,14 +130,23 @@ namespace ProgressMatrixLibrary
             {
                 for (int x = 0; x < 3; ++x)
                 {
-
                     ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
                     cellSquare.BackColor = Color.WhiteSmoke;
-
                 }
             }
         }
 
+        public void ShowProgress(Form form)
+        {
+            if (Parent == null)
+            {
+                form.Controls.Add(this);
+            }
+            BringToFront();
+            Left = (form.ClientSize.Width - Width) / 2;
+            Top = (form.ClientSize.Height - Height) / 2;
+            Show();
+        }
         public void ProgressAnimation()
         {
             if (State == ProgressState.Animate) return;
@@ -175,9 +174,7 @@ namespace ProgressMatrixLibrary
                        break;
                }
 
-
            }, cancelToken);
-
 
         }
 
@@ -192,21 +189,12 @@ namespace ProgressMatrixLibrary
 
                     for (int x = 0; x < 3; ++x)
                     {
-
                         ProgressSquare cellSquare = (ProgressSquare)tableLayoutPanel1.Controls[x + 3 * y];
                         cellSquare.FadeIn(mCellColor);
-
-
                     }
-
-
                 }
                 ResetCells();
-
-
             }
-
-
         }
         private void AnimateCellsColumnBlocks(ref CancellationToken token)
         {
@@ -226,11 +214,8 @@ namespace ProgressMatrixLibrary
 
 
                     Thread.Sleep(234);
-
-
                 }
                 ResetCells();
-
             }
         }
 
